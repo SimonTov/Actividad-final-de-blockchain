@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Verificación de Títulos Académicos</title>
+<style>
+  :root {
+    --ink: #16253D;
+    --ink-soft: #56637A;
+    --parchment: #EFE9DA;
+    --card: #FBF9F3;
+    --wax: #7A2A2A;
+    --teal: #2C6E76;
+    --valid: #2F6B4F;
+    --invalid: #A63A3A;
+    --line: #D9D0BC;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    line-height: 1.5;
+  }
+
+  .sans {
+    font-family: "Segoe UI", Inter, -apple-system, Helvetica, Arial, sans-serif;
+  }
+
+  .mono {
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+
+  /* ---------- letterhead ---------- */
+  header.letterhead {
+    border-bottom: 3px solid var(--ink);
+    padding: 28px clamp(20px, 5vw, 56px) 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .sello {
+    flex: none;
+    width: 52px;
+    height: 52px;
+  }
+
+  header.letterhead h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  header.letterhead p {
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  /* ---------- layout ---------- */
+  main {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    align-items: start;
+  }
+
+  @media (max-width: 780px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    padding: 28px clamp(16px, 4vw, 32px);
+  }
+
+  .columna-izquierda {
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+  }
+
+  @media (max-width: 780px) {
+    .columna-izquierda { border-right: none; border-bottom: 1px solid var(--line); position: static; }
+  }
+
+  .bloque-formulario {
+    margin-bottom: 28px;
+  }
+
+  .bloque-formulario h2 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+    letter-spacing: 0.02em;
+  }
+
+  select, input, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.92rem;
+  }
+
+  label.campo {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 10px 0 4px;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .btn-primario {
+    background: var(--ink);
+    color: var(--card);
+    width: 100%;
+    margin-top: 14px;
+  }
+  .btn-primario:hover { background: #223761; }
+
+  .btn-secundario {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .btn-secundario:hover { background: var(--ink); color: var(--card); }
+
+  .btn-peligro {
+    background: transparent;
+    color: var(--invalid);
+    border: 1px solid var(--invalid);
+    padding: 5px 10px;
+    font-size: 0.78rem;
+  }
+  .btn-peligro:hover { background: var(--invalid); color: white; }
+
+  .btn-alterar {
+    background: transparent;
+    color: var(--wax);
+    border: 1px solid var(--wax);
+    padding: 5px 10px;
+    font-size: 0.78rem;
+  }
+  .btn-alterar:hover { background: var(--wax); color: white; }
+
+  /* ---------- estado de la cadena ---------- */
+  .estado {
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    border: 1px solid;
+  }
+  .estado.valida {
+    background: #EAF3EE;
+    border-color: var(--valid);
+    color: #1E4B37;
+  }
+  .estado.invalida {
+    background: #F7EAEA;
+    border-color: var(--invalid);
+    color: #6E2323;
+  }
+  .estado .titulo-estado {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0 0 4px;
+  }
+  .estado ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 0.85rem;
+  }
+
+  /* ---------- nodos ---------- */
+  .nodo {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+  .nodo:last-child { border-bottom: none; }
+  .insignia {
+    flex: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: inherit;
+  }
+  .nodo .rol { color: var(--ink-soft); font-size: 0.78rem; }
+
+  /* ---------- la cadena (ledger) ---------- */
+  .ledger {
+    padding: 28px clamp(16px, 4vw, 40px) 60px;
+  }
+
+  .bloque {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--ink);
+    border-radius: 3px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .bloque.roto { border-left-color: var(--invalid); }
+
+  .bloque-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .bloque-cabecera .izq { display: flex; align-items: center; gap: 12px; }
+
+  .indice-bloque {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .etiqueta-evento {
+    font-size: 0.72rem;
+    text-transform: none;
+    background: var(--parchment);
+    color: var(--ink);
+    padding: 3px 9px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+
+  .bloque-cuerpo { padding: 14px 18px; }
+
+  .fila-detalle {
+    display: flex;
+    gap: 8px;
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+  }
+  .fila-detalle .clave { color: var(--ink-soft); min-width: 120px; }
+
+  .meta-linea {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+
+  .hash-linea {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    word-break: break-all;
+    margin-top: 4px;
+  }
+  .hash-linea b { color: var(--ink); }
+  .hash-linea.malo { color: var(--invalid); }
+  .hash-linea.malo b { color: var(--invalid); }
+
+  .acciones-bloque {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .panel-editar {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--parchment);
+    border-radius: 3px;
+    display: none;
+  }
+  .panel-editar.abierto { display: block; }
+  .panel-editar textarea { min-height: 90px; font-family: inherit; }
+  .panel-editar .acciones-bloque { margin-top: 8px; }
+
+  .aviso-genesis {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 10px;
+  }
+
+  .campo-error {
+    color: var(--invalid);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header class="letterhead">
+  <svg class="sello" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="26" cy="26" r="24" stroke="#7A2A2A" stroke-width="2"/>
+    <circle cx="26" cy="26" r="18" stroke="#7A2A2A" stroke-width="1"/>
+    <path d="M17 27l6 6 12-13" stroke="#7A2A2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <h1>Registro de Verificación de Títulos Académicos</h1>
+    <p class="sans">Cadena de bloques con consenso de autoridad (Proof of Authority) — corre entera en este navegador, sin servidor.</p>
+  </div>
+</header>
+
+<main>
+  <div class="panel columna-izquierda sans">
+
+    <div class="bloque-formulario">
+      <h2>Título</h2>
+      <select id="selector-titulo"></select>
+    </div>
+
+    <div id="estado-cadena"></div>
+
+    <div class="bloque-formulario">
+      <h2>Nodos autorizados (PoA)</h2>
+      <div id="lista-nodos"></div>
+    </div>
+
+    <div class="bloque-formulario">
+      <h2>Registrar un evento nuevo</h2>
+      <label class="campo">Tipo de evento</label>
+      <select id="tipo-evento">
+        <option value="verificacion_empleador">Verificación de un empleador</option>
+        <option value="homologacion_internacional">Homologación internacional</option>
+        <option value="correccion_oficial">Corrección oficial</option>
+      </select>
+
+      <div id="campos-evento"></div>
+
+      <button class="btn-primario" id="btn-agregar-evento">Sellar evento con la red</button>
+      <p class="campo-error" id="error-formulario"></p>
+    </div>
+
+  </div>
+
+  <div class="ledger" id="ledger"></div>
+</main>
+
+<script>
+/* =========================================================
+   SHA-256 en JavaScript puro.
+   No uso crypto.subtle a proposito: esa funcion solo corre en
+   "contextos seguros" (https:// o localhost) y falla en
+   silencio al abrir el archivo con doble clic (protocolo
+   file://) -- ya me habia pasado en la entrega anterior. Esta
+   implementacion es JS normal, sin esa restriccion, asi que el
+   sitio funciona igual abierto con doble clic que en un
+   servidor.
+   ========================================================= */
+function sha256(mensaje) {
+  function rotr(x, n) { return (x >>> n) | (x << (32 - n)); }
+  const k = [
+    0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+  ];
+  let h = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+
+  // UTF-8: convierto el string a una "cadena binaria" donde cada
+  // caracter representa un byte (0-255), para poder trabajar con
+  // texto en espanol (tildes, enies) igual que Python con UTF-8.
+  const utf8 = unescape(encodeURIComponent(mensaje));
+  const len = utf8.length;
+  const bitLen = len * 8;
+
+  let withPad = utf8 + '\x80';
+  while (withPad.length % 64 !== 56) withPad += '\x00';
+
+  // Longitud como 64 bits big-endian al final.
+  for (let i = 7; i >= 0; i--) {
+    withPad += String.fromCharCode((bitLen / Math.pow(2, i * 8)) & 0xff);
+  }
+
+  const w = new Array(64);
+  for (let chunkStart = 0; chunkStart < withPad.length; chunkStart += 64) {
+    for (let i = 0; i < 16; i++) {
+      w[i] = (withPad.charCodeAt(chunkStart + i * 4) << 24) |
+             (withPad.charCodeAt(chunkStart + i * 4 + 1) << 16) |
+             (withPad.charCodeAt(chunkStart + i * 4 + 2) << 8) |
+             (withPad.charCodeAt(chunkStart + i * 4 + 3));
+    }
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i-15],7) ^ rotr(w[i-15],18) ^ (w[i-15] >>> 3);
+      const s1 = rotr(w[i-2],17) ^ rotr(w[i-2],19) ^ (w[i-2] >>> 10);
+      w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
+    }
+
+    let [a,b,c,d,e,f,g,hh] = h;
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr(e,6) ^ rotr(e,11) ^ rotr(e,25);
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (hh + S1 + ch + k[i] + w[i]) | 0;
+      const S0 = rotr(a,2) ^ rotr(a,13) ^ rotr(a,22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) | 0;
+      hh = g; g = f; f = e; e = (d + temp1) | 0;
+      d = c; c = b; b = a; a = (temp1 + temp2) | 0;
+    }
+    h[0]=(h[0]+a)|0; h[1]=(h[1]+b)|0; h[2]=(h[2]+c)|0; h[3]=(h[3]+d)|0;
+    h[4]=(h[4]+e)|0; h[5]=(h[5]+f)|0; h[6]=(h[6]+g)|0; h[7]=(h[7]+hh)|0;
+  }
+
+  return h.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+
+/* JSON canonico: mismo principio que uso en Python con
+   json.dumps(payload, sort_keys=True) -- las claves siempre en
+   el mismo orden alfabetico, para que el hash de un bloque de
+   el mismo resultado sin importar el orden en que se hayan
+   asignado los datos. */
+function jsonCanonico(obj) {
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(jsonCanonico).join(',') + ']';
+  } else if (obj !== null && typeof obj === 'object') {
+    const claves = Object.keys(obj).sort();
+    return '{' + claves.map(k => JSON.stringify(k) + ':' + jsonCanonico(obj[k])).join(',') + '}';
+  }
+  return JSON.stringify(obj);
+}
+
+function calcularHash(bloque) {
+  const payload = {
+    indice: bloque.indice,
+    tipo_evento: bloque.tipo_evento,
+    detalle: bloque.detalle,
+    hash_anterior: bloque.hash_anterior,
+    marca_tiempo: bloque.marca_tiempo,
+    validador: bloque.validador,
+  };
+  return sha256(jsonCanonico(payload));
+}
+
+/* =========================================================
+   Catalogo de titulos y nodos autorizados -- los mismos que
+   uso en titulos.py y nodo.py del lado de Python.
+   ========================================================= */
+const TITULOS = [
+  {titular: "Camila Restrepo Uribe", programa: "Ingenieria de Sistemas", tipo_titulo: "Pregrado", universidad: "Universidad EAFIT", anio: "2022", descripcion: "Titulo de pregrado en Ingenieria de Sistemas."},
+  {titular: "Juan David Zapata Mesa", programa: "Administracion de Negocios", tipo_titulo: "Pregrado", universidad: "Universidad EAFIT", anio: "2023", descripcion: "Titulo de pregrado en Administracion de Negocios."},
+  {titular: "Valentina Gomez Arango", programa: "Maestria en Ciencia de Datos", tipo_titulo: "Posgrado", universidad: "Universidad EAFIT", anio: "2024", descripcion: "Titulo de maestria en Ciencia de Datos."},
+  {titular: "Andres Felipe Correa", programa: "Derecho", tipo_titulo: "Pregrado", universidad: "Universidad EAFIT", anio: "2021", descripcion: "Titulo de pregrado en Derecho."},
+  {titular: "Isabella Marin Vasquez", programa: "Doctorado en Ingenieria", tipo_titulo: "Doctorado", universidad: "Universidad EAFIT", anio: "2025", descripcion: "Titulo de doctorado en Ingenieria."},
+];
+
+const NODOS = [
+  {nombre: "Universidad EAFIT", rol: "Universidad emisora", color: "#16253D", iniciales: "UE"},
+  {nombre: "Ministerio de Educacion Nacional", rol: "Entidad acreditadora", color: "#7A2A2A", iniciales: "MEN"},
+  {nombre: "Verificador Internacional de Credenciales", rol: "Verificador internacional", color: "#2C6E76", iniciales: "VIC"},
+];
+
+const CAMPOS_EVENTO = {
+  verificacion_empleador: [
+    {clave: "empleador", etiqueta: "Empleador que solicita la verificacion", tipo: "text"},
+    {clave: "resultado", etiqueta: "Resultado (valido / no_encontrado)", tipo: "text"},
+  ],
+  homologacion_internacional: [
+    {clave: "pais", etiqueta: "Pais donde se homologa", tipo: "text"},
+    {clave: "entidad", etiqueta: "Entidad que otorga la homologacion", tipo: "text"},
+  ],
+  correccion_oficial: [
+    {clave: "campo", etiqueta: "Campo a corregir", tipo: "text"},
+    {clave: "valor_nuevo", etiqueta: "Valor corregido", tipo: "text"},
+    {clave: "motivo", etiqueta: "Motivo de la correccion", tipo: "text"},
+  ],
+};
+
+/* =========================================================
+   Estado de la aplicacion -- vive solo en memoria del
+   navegador (se reinicia si recargas la pagina, a proposito:
+   es una demo, no tiene backend).
+   ========================================================= */
+let cadena = [];
+let turnoNodo = 0;
+let tituloActual = null;
+
+function elegirValidador() {
+  const nodo = NODOS[turnoNodo % NODOS.length];
+  turnoNodo++;
+  return nodo;
+}
+
+function crearCadena(titulo) {
+  tituloActual = titulo;
+  turnoNodo = 0;
+  const genesis = {
+    indice: 0,
+    tipo_evento: "emision_titulo",
+    detalle: {
+      titular: titulo.titular,
+      programa: titulo.programa,
+      tipo_titulo: titulo.tipo_titulo,
+      universidad: titulo.universidad,
+      anio: titulo.anio,
+      descripcion: titulo.descripcion,
+      nota: "Registro fundacional de la emision del titulo.",
+    },
+    hash_anterior: "0".repeat(64),
+    marca_tiempo: new Date().toISOString(),
+    validador: titulo.universidad,
+  };
+  genesis.hash_bloque = calcularHash(genesis);
+  cadena = [genesis];
+  renderTodo();
+}
+
+function agregarEvento(tipoEvento, detalle) {
+  const anterior = cadena[cadena.length - 1];
+  const nodo = elegirValidador();
+  const nuevo = {
+    indice: cadena.length,
+    tipo_evento: tipoEvento,
+    detalle: detalle,
+    hash_anterior: anterior.hash_bloque,
+    marca_tiempo: new Date().toISOString(),
+    validador: nodo.nombre,
+  };
+  nuevo.hash_bloque = calcularHash(nuevo);
+  cadena.push(nuevo);
+  renderTodo();
+}
+
+function modificarBloque(indice, nuevoDetalle) {
+  // A proposito NO se vuelve a sellar la cadena completa: el
+  // bloque recalcula SU PROPIO hash con el detalle alterado,
+  // pero eso hace que ya no coincida con el hash_anterior que
+  // guarda el siguiente bloque -- asi se demuestra que cualquier
+  // cambio a la historia queda marcado como invalido.
+  const bloque = cadena[indice];
+  bloque.detalle = nuevoDetalle;
+  bloque.hash_bloque = calcularHash(bloque);
+  renderTodo();
+}
+
+function borrarBloque(indice) {
+  if (indice === 0) return;
+  cadena.splice(indice, 1);
+  cadena.forEach((b, i) => { b.indice = i; });
+  renderTodo();
+}
+
+function verificarCadena() {
+  const errores = [];
+  for (let i = 1; i < cadena.length; i++) {
+    const actual = cadena[i];
+    const anterior = cadena[i - 1];
+    if (actual.hash_bloque !== calcularHash(actual)) {
+      errores.push(`Bloque ${i}: el hash no coincide con su contenido (el evento fue alterado).`);
+    }
+    if (actual.hash_anterior !== anterior.hash_bloque) {
+      errores.push(`Bloque ${i}: no enlaza con el hash del bloque anterior (cadena rota).`);
+    }
+  }
+  return { valida: errores.length === 0, errores };
+}
+
+/* =========================================================
+   Interfaz
+   ========================================================= */
+const NOMBRES_EVENTO = {
+  emision_titulo: "Emisión del título",
+  verificacion_empleador: "Verificación de empleador",
+  homologacion_internacional: "Homologación internacional",
+  correccion_oficial: "Corrección oficial",
+};
+
+function renderSelectorTitulo() {
+  const sel = document.getElementById('selector-titulo');
+  sel.innerHTML = TITULOS.map((t, i) =>
+    `<option value="${i}">${t.titular} — ${t.programa}</option>`
+  ).join('');
+  sel.onchange = () => crearCadena(TITULOS[parseInt(sel.value)]);
+}
+
+function renderNodos() {
+  const cont = document.getElementById('lista-nodos');
+  cont.innerHTML = NODOS.map(n => `
+    <div class="nodo">
+      <div class="insignia" style="background:${n.color}">${n.iniciales}</div>
+      <div>
+        <div>${n.nombre}</div>
+        <div class="rol">${n.rol}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCamposEvento() {
+  const tipo = document.getElementById('tipo-evento').value;
+  const cont = document.getElementById('campos-evento');
+  cont.innerHTML = CAMPOS_EVENTO[tipo].map(c => `
+    <label class="campo">${c.etiqueta}</label>
+    <input type="text" data-clave="${c.clave}" id="campo-${c.clave}">
+  `).join('');
+}
+
+function nodoPorNombre(nombre) {
+  return NODOS.find(n => n.nombre === nombre);
+}
+
+function renderLedger() {
+  const { valida, errores } = verificarCadena();
+  const cont = document.getElementById('ledger');
+
+  cont.innerHTML = cadena.map((b, i) => {
+    const nodo = nodoPorNombre(b.validador);
+    const insignia = nodo
+      ? `<div class="insignia" style="background:${nodo.color}">${nodo.iniciales}</div>`
+      : `<div class="insignia" style="background:var(--ink-soft)">S</div>`;
+
+    const hashOk = b.hash_bloque === calcularHash(b);
+    const enlaceOk = i === 0 || b.hash_anterior === cadena[i - 1].hash_bloque;
+    const roto = !hashOk || !enlaceOk;
+
+    const filas = Object.entries(b.detalle).map(([k, v]) =>
+      `<div class="fila-detalle"><span class="clave sans">${k}</span><span>${v}</span></div>`
+    ).join('');
+
+    return `
+      <div class="bloque ${roto ? 'roto' : ''}">
+        <div class="bloque-cabecera">
+          <div class="izq">
+            <span class="indice-bloque">#${b.indice}</span>
+            <span class="etiqueta-evento sans">${NOMBRES_EVENTO[b.tipo_evento] || b.tipo_evento}</span>
+          </div>
+          ${insignia}
+        </div>
+        <div class="bloque-cuerpo">
+          ${filas}
+          <div class="meta-linea sans">${new Date(b.marca_tiempo).toLocaleString('es-CO')} · sellado por ${b.validador}</div>
+          <div class="hash-linea mono ${!hashOk ? 'malo' : ''}"><b>hash:</b> ${b.hash_bloque}</div>
+          <div class="hash-linea mono ${!enlaceOk ? 'malo' : ''}"><b>hash anterior:</b> ${b.hash_anterior}</div>
+
+          ${i === 0 ? `
+            <div class="aviso-genesis">Registro fundacional — no se puede eliminar.</div>
+            <div class="acciones-bloque">
+              <button class="btn-alterar sans" onclick="toggleEditar(${i})">Simular alteración</button>
+            </div>
+          ` : `
+            <div class="acciones-bloque">
+              <button class="btn-alterar sans" onclick="toggleEditar(${i})">Simular alteración</button>
+              <button class="btn-peligro sans" onclick="borrarBloque(${i})">Eliminar evento</button>
+            </div>
+          `}
+
+          <div class="panel-editar sans" id="editar-${i}">
+            <label class="campo">Nuevo contenido de "detalle" (JSON)</label>
+            <textarea id="editar-texto-${i}">${JSON.stringify(b.detalle, null, 2)}</textarea>
+            <div class="acciones-bloque">
+              <button class="btn-secundario sans" onclick="guardarAlteracion(${i})">Guardar cambio</button>
+              <button class="btn-secundario sans" onclick="toggleEditar(${i})">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const estadoCont = document.getElementById('estado-cadena');
+  if (valida) {
+    estadoCont.innerHTML = `
+      <div class="estado valida">
+        <p class="titulo-estado">Cadena válida</p>
+        <p class="sans" style="margin:0;font-size:0.85rem;">Ningún nodo ha alterado la historia de este título.</p>
+      </div>`;
+  } else {
+    estadoCont.innerHTML = `
+      <div class="estado invalida">
+        <p class="titulo-estado">Cadena no válida</p>
+        <ul class="sans">${errores.map(e => `<li>${e}</li>`).join('')}</ul>
+      </div>`;
+  }
+}
+
+function renderTodo() {
+  renderNodos();
+  renderLedger();
+}
+
+function toggleEditar(indice) {
+  document.getElementById(`editar-${indice}`).classList.toggle('abierto');
+}
+
+function guardarAlteracion(indice) {
+  const texto = document.getElementById(`editar-texto-${indice}`).value;
+  try {
+    const nuevoDetalle = JSON.parse(texto);
+    modificarBloque(indice, nuevoDetalle);
+  } catch (e) {
+    alert("El contenido no es JSON válido. Revisa las comillas y comas.");
+  }
+}
+
+document.getElementById('tipo-evento').addEventListener('change', renderCamposEvento);
+
+document.getElementById('btn-agregar-evento').addEventListener('click', () => {
+  const tipo = document.getElementById('tipo-evento').value;
+  const campos = CAMPOS_EVENTO[tipo];
+  const detalle = {};
+  let vacio = false;
+  campos.forEach(c => {
+    const valor = document.getElementById(`campo-${c.clave}`).value.trim();
+    if (!valor) vacio = true;
+    detalle[c.clave] = valor;
+  });
+  const errorEl = document.getElementById('error-formulario');
+  if (vacio) {
+    errorEl.textContent = "Completa todos los campos antes de sellar el evento.";
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+  agregarEvento(tipo, detalle);
+  campos.forEach(c => { document.getElementById(`campo-${c.clave}`).value = ''; });
+});
+
+/* Arranque */
+renderSelectorTitulo();
+renderCamposEvento();
+crearCadena(TITULOS[0]);
+</script>
+
+</body>
+</html>
