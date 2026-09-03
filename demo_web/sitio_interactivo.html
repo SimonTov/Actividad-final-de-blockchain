@@ -81,12 +81,10 @@
 
   .columna-izquierda {
     border-right: 1px solid var(--line);
-    position: sticky;
-    top: 0;
   }
 
   @media (max-width: 780px) {
-    .columna-izquierda { border-right: none; border-bottom: 1px solid var(--line); position: static; }
+    .columna-izquierda { border-right: none; border-bottom: 1px solid var(--line); }
   }
 
   .bloque-formulario {
@@ -337,9 +335,14 @@
     </div>
 
     <div id="estado-cadena"></div>
+    <button class="btn-secundario sans" id="btn-verificar" style="width:100%;margin-bottom:24px;">Verificar cadena ahora</button>
 
     <div class="bloque-formulario">
       <h2>Nodos autorizados (PoA)</h2>
+      <p class="sans" style="font-size:0.78rem;color:var(--ink-soft);margin:-4px 0 10px;">
+        Este caso de uso no tiene minado (Proof of Work): los eventos se sellan por
+        consenso de estos nodos autorizados, sin necesidad de "reminar".
+      </p>
       <div id="lista-nodos"></div>
     </div>
 
@@ -723,6 +726,8 @@ function guardarAlteracion(indice) {
 }
 
 document.getElementById('tipo-evento').addEventListener('change', renderCamposEvento);
+
+document.getElementById('btn-verificar').addEventListener('click', renderLedger);
 
 document.getElementById('btn-agregar-evento').addEventListener('click', () => {
   const tipo = document.getElementById('tipo-evento').value;
