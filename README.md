@@ -125,7 +125,8 @@ Al correr `main.py`, elegis un titulo del catalogo, y desde el menu
 podes registrar eventos (verificacion de un empleador, homologacion,
 correccion oficial), verificar la integridad de la cadena, simular una
 alteracion para ver como se detecta, y exportar el reporte HTML
-(`opcion 9`) para abrirlo directamente con doble clic en el navegador.
+(`opcion 9`) para abrirlo directamente con doble clic en el navegador. 
+También puedes correrlo desde la propia página, así pudiendo verificar todo.
 
 ## 3. Formato de la entrega
 
