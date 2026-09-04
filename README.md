@@ -116,6 +116,9 @@ python3 main.py
 
 # O la demo automatica que genera los dos reportes de ejemplo
 python3 demo_automatica.py
+
+# o quieres probarlo desde la pagina web:
+start demo_web\sitio_interactivo.html
 ```
 
 Al correr `main.py`, elegis un titulo del catalogo, y desde el menu
